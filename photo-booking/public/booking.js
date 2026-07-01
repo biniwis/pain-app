@@ -250,103 +250,20 @@ function renderSidebarCard() {
     ? `<div style="text-align:center; font-size:var(--font-size-base); font-weight:var(--font-weight-semibold); color:var(--color-text-secondary); margin-top:-var(--space-2); margin-bottom:var(--space-4);">${eventDate}</div>`
     : '';
 
-  let characterSvg = '';
+  let doodleImgHtml = '';
 
   if (state.confirmed) {
-    /* Doodle 3: Taking a photo (Success view) */
-    characterSvg = `
-      <svg class="doodle-character animate-fade-in" viewBox="0 0 200 200" width="150" height="150" style="margin: 0 auto; display: block;">
-        <!-- Solid Legs (No Outline) -->
-        <path d="M 70,135 L 70,180 L 55,180 Q 55,170 65,170 L 78,135 Z" fill="var(--color-accent-purple)" />
-        <path d="M 98,135 L 98,180 L 83,180 Q 83,170 93,170 L 106,135 Z" fill="var(--color-accent-purple)" />
-        
-        <!-- Solid Body Fill -->
-        <path d="M 100,40 Q 115,40 140,115 Q 148,135 130,135 L 70,135 Q 52,135 60,115 Z" fill="var(--color-accent-purple)" />
-        
-        <!-- Body Outline -->
-        <path d="M 100,40 Q 115,40 140,115 Q 148,135 130,135 L 70,135 Q 52,135 60,115 Z" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-        
-        <!-- Eye -->
-        <circle cx="92" cy="72" r="2.5" fill="var(--color-primary)" />
-        
-        <!-- Camera covering the other eye -->
-        <rect x="100" y="60" width="38" height="26" rx="4" fill="#ffffff" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-        <circle cx="119" cy="73" r="7" fill="none" stroke="var(--color-primary)" stroke-width="2.5" />
-        
-        <!-- Flash star -->
-        <path d="M 148,52 Q 155,42 165,47 Q 155,37 150,22 Q 145,37 135,37 Q 145,42 148,52" fill="var(--color-accent-lime)" stroke="var(--color-primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
-        
-        <!-- Arms holding camera -->
-        <path d="M 75,105 Q 90,95 98,75" fill="none" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-        <path d="M 130,112 Q 138,102 135,86" fill="none" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-      </svg>
-    `;
+    doodleImgHtml = `<img src="success_doodle.png" alt="Success Illustration" class="doodle-img animate-fade-in" style="width:160px; height:160px; object-fit:contain; display:block; margin:0 auto; border-radius:var(--radius-md);" />`;
   } else if (state.view === 'registrants') {
-    /* Doodle 2: Looking at laptop (List view) */
-    characterSvg = `
-      <svg class="doodle-character animate-fade-in" viewBox="0 0 200 200" width="150" height="150" style="margin: 0 auto; display: block;">
-        <!-- Solid Legs (No Outline) -->
-        <path d="M 65,135 L 65,180 L 50,180 Q 50,170 60,170 L 73,135 Z" fill="var(--color-accent-purple)" />
-        <path d="M 90,135 L 90,180 L 75,180 Q 75,170 85,170 L 98,135 Z" fill="var(--color-accent-purple)" />
-        
-        <!-- Solid Body Fill -->
-        <path d="M 95,40 Q 110,40 135,115 Q 143,135 125,135 L 65,135 Q 47,135 55,115 Z" fill="var(--color-accent-purple)" />
-        
-        <!-- Body Outline -->
-        <path d="M 95,40 Q 110,40 135,115 Q 143,135 125,135 L 65,135 Q 47,135 55,115 Z" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-        
-        <!-- Face -->
-        <circle cx="106" cy="72" r="2.5" fill="var(--color-primary)" />
-        <circle cx="118" cy="72" r="2.5" fill="var(--color-primary)" />
-        <circle cx="112" cy="82" r="3.5" fill="none" stroke="var(--color-primary)" stroke-width="2.5" />
-        
-        <!-- Left pointing arm (drawn exactly like the reference image) -->
-        <path d="M 85,100 L 132,82 Q 145,77 155,83 Q 158,86 150,90 L 102,108" fill="none" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-        
-        <!-- Right holding arm -->
-        <path d="M 112,118 Q 128,122 145,112" fill="none" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-        
-        <!-- Laptop (Exactly like reference) -->
-        <path d="M 135,108 L 175,104 L 182,75 L 142,79 Z" fill="#ffffff" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-        <path d="M 135,108 L 175,104 L 180,111 L 140,115 Z" fill="none" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-      </svg>
-    `;
+    doodleImgHtml = `<img src="list_doodle.png" alt="List Illustration" class="doodle-img animate-fade-in" style="width:160px; height:160px; object-fit:contain; display:block; margin:0 auto; border-radius:var(--radius-md);" />`;
   } else {
-    /* Doodle 1: Waving with camera (Booking view) */
-    characterSvg = `
-      <svg class="doodle-character animate-fade-in" viewBox="0 0 200 200" width="150" height="150" style="margin: 0 auto; display: block;">
-        <!-- Solid Legs (No Outline) -->
-        <path d="M 70,135 L 70,180 L 55,180 Q 55,170 65,170 L 78,135 Z" fill="var(--color-accent-purple)" />
-        <path d="M 98,135 L 98,180 L 83,180 Q 83,170 93,170 L 106,135 Z" fill="var(--color-accent-purple)" />
-        
-        <!-- Solid Body Fill -->
-        <path d="M 100,40 Q 115,40 140,115 Q 148,135 130,135 L 70,135 Q 52,135 60,115 Z" fill="var(--color-accent-purple)" />
-        
-        <!-- Body Outline -->
-        <path d="M 100,40 Q 115,40 140,115 Q 148,135 130,135 L 70,135 Q 52,135 60,115 Z" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-        
-        <!-- Eyes (Minimalist) -->
-        <circle cx="102" cy="72" r="2.5" fill="var(--color-primary)" />
-        <circle cx="114" cy="72" r="2.5" fill="var(--color-primary)" />
-        
-        <!-- Waving Left Arm (Line art, no fill) -->
-        <path d="M 68,98 Q 45,90 30,105 Q 25,110 32,115 Q 40,110 60,103" fill="none" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-        
-        <!-- Right Arm holding Camera (Line art) -->
-        <path d="M 130,102 Q 145,95 155,85" fill="none" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-        <path d="M 132,112 Q 148,118 152,110" fill="none" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-        
-        <!-- Camera (Sleek vector style) -->
-        <rect x="145" y="86" width="34" height="24" rx="4" fill="#ffffff" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-        <circle cx="162" cy="98" r="7" fill="none" stroke="var(--color-primary)" stroke-width="2.5" />
-      </svg>
-    `;
+    doodleImgHtml = `<img src="booking_doodle.png" alt="Booking Illustration" class="doodle-img animate-fade-in" style="width:160px; height:160px; object-fit:contain; display:block; margin:0 auto; border-radius:var(--radius-md);" />`;
   }
 
   return `
     <div class="studio-sidebar-card" style="padding: var(--space-6) var(--space-5);">
       <div style="text-align:center; margin-bottom:var(--space-4);">
-        ${characterSvg}
+        ${doodleImgHtml}
       </div>
       
       <div class="sidebar-content" style="padding:0; text-align:right;">
