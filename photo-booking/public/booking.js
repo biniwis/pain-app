@@ -126,57 +126,7 @@ function renderBookingPanel(tabsHtml) {
     `;
   }
 
-  /* Date selector chips (carousel style) */
-  let dateChipsHtml = '';
-  for (const date of state.dates) {
-    const isSelected = date === state.selectedDate;
-    const dayName = getDayNameShort(date);
-    const dayNum = date.split('-')[2];
-    dateChipsHtml += `
-      <button type="button" class="date-carousel-chip ${isSelected ? 'active' : ''}" data-carousel-date="${date}">
-        <span class="chip-day-name">${dayName}</span>
-        <span class="chip-day-num">${dayNum}</span>
-      </button>
-    `;
-  }
-
-  /* Slots for selected date */
-  const activeSlots = state.slots.filter(s => s.date === state.selectedDate);
-  const morningSlots = activeSlots.filter(s => parseInt(s.start_time.split(':')[0], 10) < 12);
-  const afternoonSlots = activeSlots.filter(s => parseInt(s.start_time.split(':')[0], 10) >= 12);
-
-  let slotsSectionsHtml = '';
-
-  if (activeSlots.length === 0) {
-    slotsSectionsHtml = `<p class="muted" style="text-align:center; padding:var(--space-6) 0;">כל התורים ליום זה נתפסו. בחרו תאריך אחר ↑</p>`;
-  } else {
-    if (morningSlots.length > 0) {
-      slotsSectionsHtml += `
-        <div class="time-section">
-          <div class="time-section-title">בוקר</div>
-          <div class="slot-buttons">
-            ${morningSlots.map(s => {
-              const selected = s.id === state.selectedSlotId ? 'selected' : '';
-              return `<button type="button" class="slot ${selected}" data-slot-id="${s.id}">${s.start_time}</button>`;
-            }).join('')}
-          </div>
-        </div>
-      `;
-    }
-    if (afternoonSlots.length > 0) {
-      slotsSectionsHtml += `
-        <div class="time-section" style="margin-top:var(--space-4);">
-          <div class="time-section-title">אחר הצהריים</div>
-          <div class="slot-buttons">
-            ${afternoonSlots.map(s => {
-              const selected = s.id === state.selectedSlotId ? 'selected' : '';
-              return `<button type="button" class="slot ${selected}" data-slot-id="${s.id}">${s.start_time}</button>`;
-            }).join('')}
-          </div>
-        </div>
-      `;
-    }
-  }
+  const sortedSlots = [...state.slots].sort((a, b) => a.start_time.localeCompare(b.start_time));
 
   /* Booking form card */
   let formCardHtml = '';
@@ -204,18 +154,17 @@ function renderBookingPanel(tabsHtml) {
     ${tabsHtml}
     <div class="card booking-selector-card">
       <div class="card-inner-header" style="margin-bottom:var(--space-5);">
-        <h2>בחירת מועד לצילום</h2>
-        <p class="muted">בחרו את היום והשעה הנוחים לכם מתוך השעות הפנויות ביומן.</p>
+        <h2>בחירת שעה לצילום</h2>
+        <p class="muted">בחרו את השעה הנוחה לכם מתוך השעות הפנויות ביומן.</p>
       </div>
 
-      <div class="date-carousel-wrapper">
-        <div class="date-carousel">
-          ${dateChipsHtml}
+      <div class="slots-container-box">
+        <div class="slot-buttons">
+          ${sortedSlots.map(s => {
+            const selected = s.id === state.selectedSlotId ? 'selected' : '';
+            return `<button type="button" class="slot ${selected}" data-slot-id="${s.id}">${s.start_time}</button>`;
+          }).join('')}
         </div>
-      </div>
-
-      <div class="slots-container-box" style="margin-top:var(--space-4);">
-        ${slotsSectionsHtml}
       </div>
     </div>
 
