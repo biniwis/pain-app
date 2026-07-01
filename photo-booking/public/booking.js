@@ -75,11 +75,9 @@ function render() {
 
   /* Tabs segmented control */
   const tabsHtml = `
-    <div class="segmented-control-wrapper">
-      <div class="segmented-control">
-        <button type="button" class="control-btn ${state.view === 'book' ? 'active' : ''}" id="tab-book">קביעת תור</button>
-        <button type="button" class="control-btn ${state.view === 'registrants' ? 'active' : ''}" id="tab-registrants">מי כבר נרשם</button>
-      </div>
+    <div class="segmented-control">
+      <button type="button" class="control-btn ${state.view === 'book' ? 'active' : ''}" id="tab-book">קביעת תור</button>
+      <button type="button" class="control-btn ${state.view === 'registrants' ? 'active' : ''}" id="tab-registrants">מי כבר נרשם</button>
     </div>
   `;
 
@@ -151,8 +149,10 @@ function renderBookingPanel(tabsHtml) {
   }
 
   return `
-    ${tabsHtml}
     <div class="card booking-selector-card">
+      <div style="display:flex; justify-content:center; margin-bottom:var(--space-5); border-bottom:1px solid var(--color-border-light); padding-bottom:var(--space-4);">
+        ${tabsHtml}
+      </div>
       <div class="card-inner-header" style="margin-bottom:var(--space-5);">
         <h2>בחירת שעה לצילום</h2>
         <p class="muted">בחרו את השעה הנוחה לכם מתוך השעות הפנויות ביומן.</p>
@@ -194,8 +194,10 @@ function renderRegistrantsListPanel(tabsHtml) {
     .join('');
 
   return `
-    ${tabsHtml}
     <div class="card">
+      <div style="display:flex; justify-content:center; margin-bottom:var(--space-5); border-bottom:1px solid var(--color-border-light); padding-bottom:var(--space-4);">
+        ${tabsHtml}
+      </div>
       <div class="card-inner-header" style="margin-bottom:var(--space-4);">
         <h2>רשימת המשתתפים שנרשמו</h2>
         <p class="muted">ניתן לשנות שם או לבטל תור שנרשם במידת הצורך ישירות מהרשימה.</p>
@@ -243,6 +245,11 @@ function renderConfirmationPanel() {
 }
 
 function renderSidebarCard() {
+  const eventDate = state.slots.length > 0 ? formatDate(state.slots[0].date) : '';
+  const dateHtml = eventDate 
+    ? `<div style="text-align:center; font-size:var(--font-size-base); font-weight:var(--font-weight-semibold); color:var(--color-text-secondary); margin-top:-var(--space-2); margin-bottom:var(--space-4);">${eventDate}</div>`
+    : '';
+
   return `
     <div class="studio-sidebar-card" style="padding: var(--space-6) var(--space-5);">
       <div style="text-align:center; margin-bottom:var(--space-4);">
@@ -276,7 +283,8 @@ function renderSidebarCard() {
       </div>
       
       <div class="sidebar-content" style="padding:0; text-align:right;">
-        <h3 class="sidebar-title" style="text-align:center; font-size:var(--font-size-xl); margin-bottom:var(--space-4);">${state.event.name}</h3>
+        <h3 class="sidebar-title" style="text-align:center; font-size:var(--font-size-xl); margin-bottom:var(--space-3);">${state.event.name}</h3>
+        ${dateHtml}
 
         <div class="sidebar-prep-tips" style="border-top:1px solid var(--color-border-light); padding-top:var(--space-4);">
           <h4 style="font-size:var(--font-size-md); margin-bottom:var(--space-3); color:var(--color-primary);">הנחיות הגעה וצילום:</h4>
