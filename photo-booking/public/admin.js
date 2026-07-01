@@ -378,7 +378,10 @@ function renderEventDetail() {
 
     bookingsSection = `
       <div class="card">
-        <h2>הזמנות (${state.bookings.length})</h2>
+        <div class="section-header" style="margin-bottom:var(--space-4);">
+          <h2>הזמנות (${state.bookings.length})</h2>
+          <button type="button" class="secondary small" id="export-excel-btn" style="padding: 6px 12px; font-size: var(--font-size-xs);">ייצוא ל-Excel</button>
+        </div>
         <div class="table-responsive">
           <table>
             <thead><tr><th>מתי</th><th>שם</th><th>הגעה</th><th></th></tr></thead>
@@ -435,6 +438,30 @@ function renderEventDetail() {
     e.target.textContent = 'הועתק!';
     setTimeout(() => (e.target.textContent = 'העתקה'), 1500);
   });
+
+  const exportBtn = document.getElementById('export-excel-btn');
+  if (exportBtn) {
+    exportBtn.addEventListener('click', () => {
+      const bom = '\uFEFF';
+      const headers = ['תאריך', 'שעת התחלה', 'שעת סיום', 'שם המשתתף', 'סטטוס הגעה'].join(',');
+      const rows = state.bookings.map(b => {
+        const dateStr = b.date;
+        const start = b.start_time;
+        const end = b.end_time;
+        const name = `"${(b.client_name || '').replace(/"/g, '""')}"`;
+        const attended = b.attended ? 'הגיע' : 'לא הגיע';
+        return [dateStr, start, end, name, attended].join(',');
+      });
+      const csvContent = bom + [headers, ...rows].join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `bookings_${ev.slug}_${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+  }
 
   document.getElementById('rename-event-detail').addEventListener('click', async () => {
     const newName = prompt('שם חדש לאירוע:', ev.name);
