@@ -22,7 +22,8 @@ async function initDatabase() {
       const url = `${supabaseUrl}/storage/v1/object/authenticated/${bucket}/booking.db`;
       const res = await fetch(url, {
         headers: {
-          'Authorization': `Bearer ${supabaseKey}`
+          'Authorization': `Bearer ${supabaseKey}`,
+          'apikey': supabaseKey
         }
       });
       if (res.ok) {
@@ -73,6 +74,7 @@ if (supabaseUrl && supabaseKey) {
             method: 'PUT',
             headers: {
               'Authorization': `Bearer ${supabaseKey}`,
+              'apikey': supabaseKey,
               'Content-Type': 'application/octet-stream',
               'x-upsert': 'true'
             },
