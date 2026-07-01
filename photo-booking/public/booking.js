@@ -225,7 +225,7 @@ function renderConfirmationPanel() {
         </svg>
       </div>
       <h2 class="confirmation-title">התור נקבע בהצלחה!</h2>
-      <p class="confirmation-subtitle">נתראה בסטודיו ביום <strong>${formatDate(slot.date)}</strong> בשעה <strong>${slot.start_time}</strong>.</p>
+      <p class="confirmation-subtitle">נתראה ביום <strong>${formatDate(slot.date)}</strong> בשעה <strong>${slot.start_time}</strong>.</p>
       
       <div class="calendar-integration-box">
         <span class="integration-title">הוסיפו ליומן שלא תשכחו:</span>
