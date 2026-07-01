@@ -53,6 +53,35 @@ adminRouter.post('/', (req, res) => {
   res.status(201).json({ id: info.lastInsertRowid, name: name.trim(), slug });
 });
 
+adminRouter.patch('/:id', (req, res) => {
+  const event = db.prepare('SELECT * FROM events WHERE id = ?').get(req.params.id);
+  if (!event) {
+    return res.status(404).json({ error: 'Event not found' });
+  }
+  const { name } = req.body || {};
+  if (!name || !name.trim()) {
+    return res.status(400).json({ error: 'name is required' });
+  }
+  db.prepare('UPDATE events SET name = ? WHERE id = ?').run(name.trim(), req.params.id);
+  res.json({ ok: true, name: name.trim() });
+});
+
+adminRouter.delete('/:id', (req, res) => {
+  const event = db.prepare('SELECT * FROM events WHERE id = ?').get(req.params.id);
+  if (!event) {
+    return res.status(404).json({ error: 'Event not found' });
+  }
+  const deleteEvent = db.transaction(() => {
+    db.prepare(
+      'DELETE FROM bookings WHERE slot_id IN (SELECT id FROM slots WHERE event_id = ?)'
+    ).run(req.params.id);
+    db.prepare('DELETE FROM slots WHERE event_id = ?').run(req.params.id);
+    db.prepare('DELETE FROM events WHERE id = ?').run(req.params.id);
+  });
+  deleteEvent();
+  res.json({ ok: true });
+});
+
 adminRouter.get('/:id/slots', (req, res) => {
   const slots = db
     .prepare(
@@ -73,7 +102,7 @@ adminRouter.post('/:id/slots', (req, res) => {
     return res.status(404).json({ error: 'Event not found' });
   }
 
-  const { date, start_time, end_time, duration_minutes } = req.body || {};
+  const { date, start_time, end_time, duration_minutes, break_start, break_end } = req.body || {};
   const duration = Number(duration_minutes);
   if (!date || !start_time || !end_time || !duration || duration <= 0) {
     return res
@@ -87,12 +116,27 @@ adminRouter.post('/:id/slots', (req, res) => {
     return res.status(400).json({ error: 'end_time must be after start_time' });
   }
 
+  let breakStartMin = null;
+  let breakEndMin = null;
+  if (break_start && break_end) {
+    breakStartMin = timeToMinutes(break_start);
+    breakEndMin = timeToMinutes(break_end);
+    if (Number.isNaN(breakStartMin) || Number.isNaN(breakEndMin) || breakEndMin <= breakStartMin) {
+      return res.status(400).json({ error: 'break_end must be after break_start' });
+    }
+  }
+
   const ranges = [];
   for (let t = startMin; t + duration <= endMin; t += duration) {
-    ranges.push({ start_time: minutesToTime(t), end_time: minutesToTime(t + duration) });
+    const slotEnd = t + duration;
+    const overlapsBreak = breakStartMin !== null && t < breakEndMin && slotEnd > breakStartMin;
+    if (overlapsBreak) continue;
+    ranges.push({ start_time: minutesToTime(t), end_time: minutesToTime(slotEnd) });
   }
   if (ranges.length === 0) {
-    return res.status(400).json({ error: 'duration_minutes is longer than the given time range' });
+    return res
+      .status(400)
+      .json({ error: 'No slots could be created for this range (check the duration and break times)' });
   }
 
   const insert = db.prepare(
