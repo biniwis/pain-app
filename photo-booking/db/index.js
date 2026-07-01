@@ -12,8 +12,8 @@ if (!fs.existsSync(dataDir)) {
 
 // Download database from Supabase at startup
 async function initDatabase() {
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_KEY;
+  const supabaseUrl = process.env.SUPABASE_URL || 'https://tnjxweirnjaidbhbdlyw.supabase.co';
+  const supabaseKey = process.env.SUPABASE_KEY || 'sb_secret_7Gwn0cSnwHLcxe8ZLYytYQ_IAoTcEen';
   const bucket = process.env.SUPABASE_BUCKET || 'database';
 
   if (supabaseUrl && supabaseKey) {
@@ -51,11 +51,11 @@ const schema = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
 db.exec(schema);
 
 // Watch database file changes to auto-backup
-if (process.env.SUPABASE_URL && process.env.SUPABASE_KEY) {
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_KEY;
-  const bucket = process.env.SUPABASE_BUCKET || 'database';
+const supabaseUrl = process.env.SUPABASE_URL || 'https://tnjxweirnjaidbhbdlyw.supabase.co';
+const supabaseKey = process.env.SUPABASE_KEY || 'sb_secret_7Gwn0cSnwHLcxe8ZLYytYQ_IAoTcEen';
+const bucket = process.env.SUPABASE_BUCKET || 'database';
 
+if (supabaseUrl && supabaseKey) {
   let uploadTimeout = null;
 
   fs.watch(dbPath, (eventType) => {
