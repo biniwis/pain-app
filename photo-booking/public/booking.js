@@ -256,80 +256,89 @@ function renderSidebarCard() {
     /* Doodle 3: Taking a photo (Success view) */
     characterSvg = `
       <svg class="doodle-character animate-fade-in" viewBox="0 0 200 200" width="150" height="150" style="margin: 0 auto; display: block;">
-        <path d="M 100,35 Q 120,40 145,100 Q 155,120 145,135 Q 135,145 100,140 Q 65,145 55,135 Q 45,120 55,100 Z" fill="var(--color-accent-purple)" opacity="0.95" />
-        <rect x="75" y="65" width="54" height="38" rx="8" fill="var(--color-accent-lime)" />
-        <path d="M 50,45 L 60,35 L 50,25 L 40,35 Z" fill="#ffffff" />
+        <!-- Solid Legs (No Outline) -->
+        <path d="M 70,135 L 70,180 L 55,180 Q 55,170 65,170 L 78,135 Z" fill="var(--color-accent-purple)" />
+        <path d="M 98,135 L 98,180 L 83,180 Q 83,170 93,170 L 106,135 Z" fill="var(--color-accent-purple)" />
         
-        <path d="M 80,140 L 80,175 Q 75,180 65,180" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-        <path d="M 115,140 L 115,175 Q 120,180 130,180" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-        <line x1="50" y1="180" x2="150" y2="180" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" />
+        <!-- Solid Body Fill -->
+        <path d="M 100,40 Q 115,40 140,115 Q 148,135 130,135 L 70,135 Q 52,135 60,115 Z" fill="var(--color-accent-purple)" />
         
-        <path d="M 100,35 Q 120,40 145,100 Q 155,120 145,135 Q 135,145 100,140 Q 65,145 55,135 Q 45,120 55,100 Z" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        <!-- Body Outline -->
+        <path d="M 100,40 Q 115,40 140,115 Q 148,135 130,135 L 70,135 Q 52,135 60,115 Z" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
         
-        <path d="M 85,60 Q 92,55 95,60" fill="none" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" />
-        <circle cx="112" cy="58" r="3" fill="var(--color-primary)" />
+        <!-- Eye -->
+        <circle cx="92" cy="72" r="2.5" fill="var(--color-primary)" />
         
-        <rect x="73" y="65" width="54" height="38" rx="8" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-        <circle cx="100" cy="84" r="14" fill="#ffffff" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" />
-        <circle cx="100" cy="84" r="6" fill="var(--color-primary)" />
+        <!-- Camera covering the other eye -->
+        <rect x="100" y="60" width="38" height="26" rx="4" fill="#ffffff" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+        <circle cx="119" cy="73" r="7" fill="none" stroke="var(--color-primary)" stroke-width="2.5" />
         
-        <path d="M 58,110 Q 70,100 80,95" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-        <path d="M 142,110 Q 130,100 120,95" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        <!-- Flash star -->
+        <path d="M 148,52 Q 155,42 165,47 Q 155,37 150,22 Q 145,37 135,37 Q 145,42 148,52" fill="var(--color-accent-lime)" stroke="var(--color-primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
         
-        <path d="M 50,45 Q 60,35 70,40 Q 60,30 55,15 Q 50,30 40,30 Q 50,35 50,45" fill="none" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-        <circle cx="35" cy="50" r="2" fill="var(--color-primary)" />
-        <circle cx="65" cy="20" r="2" fill="var(--color-primary)" />
+        <!-- Arms holding camera -->
+        <path d="M 75,105 Q 90,95 98,75" fill="none" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M 130,112 Q 138,102 135,86" fill="none" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
       </svg>
     `;
   } else if (state.view === 'registrants') {
     /* Doodle 2: Looking at laptop (List view) */
     characterSvg = `
       <svg class="doodle-character animate-fade-in" viewBox="0 0 200 200" width="150" height="150" style="margin: 0 auto; display: block;">
-        <path d="M 90,35 Q 110,40 135,100 Q 145,120 130,135 Q 110,140 85,138 Q 60,140 50,130 Q 40,115 50,95 Z" fill="var(--color-accent-purple)" opacity="0.95" />
-        <path d="M 135,108 L 175,105 L 180,75 L 140,78 Z" fill="var(--color-accent-lime)" opacity="0.9" />
+        <!-- Solid Legs (No Outline) -->
+        <path d="M 65,135 L 65,180 L 50,180 Q 50,170 60,170 L 73,135 Z" fill="var(--color-accent-purple)" />
+        <path d="M 90,135 L 90,180 L 75,180 Q 75,170 85,170 L 98,135 Z" fill="var(--color-accent-purple)" />
         
-        <path d="M 70,138 L 70,175 Q 65,180 55,180" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-        <path d="M 105,138 L 105,175 Q 110,180 120,180" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-        <line x1="40" y1="180" x2="160" y2="180" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" />
+        <!-- Solid Body Fill -->
+        <path d="M 95,40 Q 110,40 135,115 Q 143,135 125,135 L 65,135 Q 47,135 55,115 Z" fill="var(--color-accent-purple)" />
         
-        <path d="M 90,35 Q 110,40 135,100 Q 145,120 130,135 Q 110,140 85,138 Q 60,140 50,130 Q 40,115 50,95 Z" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        <!-- Body Outline -->
+        <path d="M 95,40 Q 110,40 135,115 Q 143,135 125,135 L 65,135 Q 47,135 55,115 Z" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
         
-        <circle cx="102" cy="74" r="3" fill="var(--color-primary)" />
-        <circle cx="118" cy="74" r="3" fill="var(--color-primary)" />
-        <circle cx="110" cy="84" r="4" fill="none" stroke="var(--color-primary)" stroke-width="3" />
+        <!-- Face -->
+        <circle cx="106" cy="72" r="2.5" fill="var(--color-primary)" />
+        <circle cx="118" cy="72" r="2.5" fill="var(--color-primary)" />
+        <circle cx="112" cy="82" r="3.5" fill="none" stroke="var(--color-primary)" stroke-width="2.5" />
         
-        <path d="M 85,105 L 125,92 Q 135,90 145,95 Q 148,98 140,102 L 100,112" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-        <path d="M 105,120 Q 125,125 140,115" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        <!-- Left pointing arm (drawn exactly like the reference image) -->
+        <path d="M 85,100 L 132,82 Q 145,77 155,83 Q 158,86 150,90 L 102,108" fill="none" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
         
-        <path d="M 130,110 L 170,107 L 180,72 L 140,75 Z" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-        <path d="M 130,110 L 170,107 L 175,114 L 135,117 Z" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        <!-- Right holding arm -->
+        <path d="M 112,118 Q 128,122 145,112" fill="none" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+        
+        <!-- Laptop (Exactly like reference) -->
+        <path d="M 135,108 L 175,104 L 182,75 L 142,79 Z" fill="#ffffff" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M 135,108 L 175,104 L 180,111 L 140,115 Z" fill="none" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
       </svg>
     `;
   } else {
     /* Doodle 1: Waving with camera (Booking view) */
     characterSvg = `
       <svg class="doodle-character animate-fade-in" viewBox="0 0 200 200" width="150" height="150" style="margin: 0 auto; display: block;">
-        <path d="M 100,35 Q 120,40 145,100 Q 155,120 145,135 Q 135,145 100,140 Q 65,145 55,135 Q 45,120 55,100 Z" fill="var(--color-accent-purple)" opacity="0.95" />
-        <rect x="110" y="95" width="40" height="28" rx="6" fill="var(--color-accent-lime)" />
-        <circle cx="130" cy="109" r="10" fill="#ffffff" />
+        <!-- Solid Legs (No Outline) -->
+        <path d="M 70,135 L 70,180 L 55,180 Q 55,170 65,170 L 78,135 Z" fill="var(--color-accent-purple)" />
+        <path d="M 98,135 L 98,180 L 83,180 Q 83,170 93,170 L 106,135 Z" fill="var(--color-accent-purple)" />
         
-        <path d="M 80,140 L 80,175 Q 75,180 65,180" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-        <path d="M 115,140 L 115,175 Q 120,180 130,180" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-        <line x1="50" y1="180" x2="150" y2="180" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" />
+        <!-- Solid Body Fill -->
+        <path d="M 100,40 Q 115,40 140,115 Q 148,135 130,135 L 70,135 Q 52,135 60,115 Z" fill="var(--color-accent-purple)" />
         
-        <path d="M 100,35 Q 120,40 145,100 Q 155,120 145,135 Q 135,145 100,140 Q 65,145 55,135 Q 45,120 55,100 Z" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        <!-- Body Outline -->
+        <path d="M 100,40 Q 115,40 140,115 Q 148,135 130,135 L 70,135 Q 52,135 60,115 Z" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
         
-        <circle cx="92" cy="78" r="3" fill="var(--color-primary)" />
-        <circle cx="108" cy="78" r="3" fill="var(--color-primary)" />
-        <path d="M 96,86 Q 100,90 104,86" fill="none" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" />
+        <!-- Eyes (Minimalist) -->
+        <circle cx="102" cy="72" r="2.5" fill="var(--color-primary)" />
+        <circle cx="114" cy="72" r="2.5" fill="var(--color-primary)" />
         
-        <path d="M 58,105 Q 35,90 20,100 Q 15,105 20,110 Q 30,105 52,112" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        <!-- Waving Left Arm (Line art, no fill) -->
+        <path d="M 68,98 Q 45,90 30,105 Q 25,110 32,115 Q 40,110 60,103" fill="none" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
         
-        <path d="M 135,115 Q 125,125 110,120" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-        <path d="M 142,105 Q 155,90 140,85" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        <!-- Right Arm holding Camera (Line art) -->
+        <path d="M 130,102 Q 145,95 155,85" fill="none" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M 132,112 Q 148,118 152,110" fill="none" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
         
-        <rect x="110" y="95" width="40" height="28" rx="6" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-        <circle cx="130" cy="109" r="10" fill="none" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" />
+        <!-- Camera (Sleek vector style) -->
+        <rect x="145" y="86" width="34" height="24" rx="4" fill="#ffffff" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+        <circle cx="162" cy="98" r="7" fill="none" stroke="var(--color-primary)" stroke-width="2.5" />
       </svg>
     `;
   }
