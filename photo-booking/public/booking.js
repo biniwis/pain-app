@@ -97,12 +97,7 @@ function render() {
         <h2>פרטים לתיאום התור (${formatDate(slot.date)}, ${slot.start_time})</h2>
         ${state.error ? `<p class="error">${state.error}</p>` : ''}
         <form id="booking-form">
-          <label><span>שם מלא *</span><input type="text" name="client_name" required /></label>
-          <label><span>אימייל</span><input type="email" name="client_email" /></label>
-          <label><span>טלפון</span><input type="tel" name="client_phone" /></label>
-          <label><span>מחלקה / ארגון</span><input type="text" name="department" /></label>
-          <label><span>הערות</span><textarea name="notes" rows="2"></textarea></label>
-          <p class="muted">יש למלא אימייל או טלפון לפחות.</p>
+          <label><span>שם מלא</span><input type="text" name="client_name" required autofocus /></label>
           <div class="actions-row">
             <button type="submit" class="primary" ${state.submitting ? 'disabled' : ''}>אישור קביעת תור</button>
             <button type="button" class="secondary" id="cancel-selection">ביטול</button>
@@ -166,7 +161,6 @@ function renderRegistrantsList(tabsHtml) {
         <td>${formatDate(b.date)}</td>
         <td>${b.start_time}</td>
         <td>${b.client_name}</td>
-        <td>${b.department || ''}</td>
       </tr>
     `
     )
@@ -177,8 +171,8 @@ function renderRegistrantsList(tabsHtml) {
     <div class="card">
       <h2>מי כבר נרשם</h2>
       <table>
-        <thead><tr><th>תאריך</th><th>שעה</th><th>שם</th><th>מחלקה</th></tr></thead>
-        <tbody>${rows || '<tr><td colspan="4" class="muted">אין נרשמים עדיין</td></tr>'}</tbody>
+        <thead><tr><th>תאריך</th><th>שעה</th><th>שם</th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="3" class="muted">אין נרשמים עדיין</td></tr>'}</tbody>
       </table>
     </div>
   `;
@@ -229,13 +223,21 @@ function renderConfirmation() {
   app.innerHTML = `
     <div class="card confirmation">
       <h2>התור נקבע בהצלחה!</h2>
-      <p>${client_name}, נראה אתכם ב-${formatDate(slot.date)} בשעה ${slot.start_time}.</p>
+      <p>${client_name}, נתראה ב-${formatDate(slot.date)} בשעה ${slot.start_time}.</p>
       <div class="actions-row" style="justify-content:center">
-        <button type="button" class="secondary" id="download-ics">הורדת תזכורת ליומן (ICS)</button>
+        <button type="button" class="secondary" id="download-ics">הוספה ליומן (ICS)</button>
         <a class="secondary" style="text-decoration:none; display:inline-block" href="${googleCalendarLink(
           icsArgs
-        )}" target="_blank" rel="noopener">הוספה ל-Google Calendar</a>
+        )}" target="_blank" rel="noopener">Google Calendar</a>
       </div>
+    </div>
+    <div class="card prep-tips">
+      <h2>איך מגיעים מוכנים? 📸</h2>
+      <ul>
+        <li><strong>לבוש ייצוגי ונקי</strong> — חולצה חלקה בצבע אחיד, ללא הדפסים, לוגואים או ציורים בולטים.</li>
+        <li><strong>שיער מסודר</strong> — כפי שתרצו להיראות באופן מקצועי. זה הזמן להגיע עם הלוק שמייצג אתכם.</li>
+      </ul>
+      <p class="muted">הצילום עצמו קצר וקל — פשוט תגיעו עם חיוך ואנחנו נדאג לכל השאר.</p>
     </div>
   `;
 
@@ -255,11 +257,7 @@ async function handleSubmit(e) {
   const form = e.target;
   const data = Object.fromEntries(new FormData(form).entries());
 
-  if (!data.client_email?.trim() && !data.client_phone?.trim()) {
-    state.error = 'יש למלא אימייל או טלפון לפחות.';
-    render();
-    return;
-  }
+
 
   state.submitting = true;
   state.error = null;

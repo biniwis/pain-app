@@ -102,7 +102,7 @@ adminRouter.post('/:id/slots', (req, res) => {
     return res.status(404).json({ error: 'Event not found' });
   }
 
-  const { date, start_time, end_time, duration_minutes, break_start, break_end } = req.body || {};
+  const { date, start_time, end_time, duration_minutes, break_start, break_end, overwrite } = req.body || {};
   const duration = Number(duration_minutes);
   if (!date || !start_time || !end_time || !duration || duration <= 0) {
     return res
@@ -143,6 +143,13 @@ adminRouter.post('/:id/slots', (req, res) => {
     'INSERT INTO slots (event_id, date, start_time, end_time) VALUES (?, ?, ?, ?)'
   );
   const insertMany = db.transaction((rows) => {
+    if (overwrite === 'true' || overwrite === true) {
+      db.prepare(`
+        DELETE FROM bookings 
+        WHERE slot_id IN (SELECT id FROM slots WHERE event_id = ? AND date = ?)
+      `).run(event.id, date);
+      db.prepare('DELETE FROM slots WHERE event_id = ? AND date = ?').run(event.id, date);
+    }
     const created = [];
     for (const row of rows) {
       const info = insert.run(event.id, date, row.start_time, row.end_time);

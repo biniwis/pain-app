@@ -10,9 +10,6 @@ publicRouter.post('/', (req, res) => {
   if (!slot_id || !client_name || !client_name.trim()) {
     return res.status(400).json({ error: 'slot_id and client_name are required' });
   }
-  if (!(client_email && client_email.trim()) && !(client_phone && client_phone.trim())) {
-    return res.status(400).json({ error: 'client_email or client_phone is required' });
-  }
 
   const createBooking = db.transaction(() => {
     const slot = db
