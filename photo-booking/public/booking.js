@@ -250,36 +250,94 @@ function renderSidebarCard() {
     ? `<div style="text-align:center; font-size:var(--font-size-base); font-weight:var(--font-weight-semibold); color:var(--color-text-secondary); margin-top:-var(--space-2); margin-bottom:var(--space-4);">${eventDate}</div>`
     : '';
 
+  let characterSvg = '';
+
+  if (state.confirmed) {
+    /* Doodle 3: Taking a photo (Success view) */
+    characterSvg = `
+      <svg class="doodle-character animate-fade-in" viewBox="0 0 200 200" width="150" height="150" style="margin: 0 auto; display: block;">
+        <path d="M 100,35 Q 120,40 145,100 Q 155,120 145,135 Q 135,145 100,140 Q 65,145 55,135 Q 45,120 55,100 Z" fill="var(--color-accent-purple)" opacity="0.95" />
+        <rect x="75" y="65" width="54" height="38" rx="8" fill="var(--color-accent-lime)" />
+        <path d="M 50,45 L 60,35 L 50,25 L 40,35 Z" fill="#ffffff" />
+        
+        <path d="M 80,140 L 80,175 Q 75,180 65,180" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M 115,140 L 115,175 Q 120,180 130,180" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        <line x1="50" y1="180" x2="150" y2="180" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" />
+        
+        <path d="M 100,35 Q 120,40 145,100 Q 155,120 145,135 Q 135,145 100,140 Q 65,145 55,135 Q 45,120 55,100 Z" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        
+        <path d="M 85,60 Q 92,55 95,60" fill="none" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" />
+        <circle cx="112" cy="58" r="3" fill="var(--color-primary)" />
+        
+        <rect x="73" y="65" width="54" height="38" rx="8" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        <circle cx="100" cy="84" r="14" fill="#ffffff" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" />
+        <circle cx="100" cy="84" r="6" fill="var(--color-primary)" />
+        
+        <path d="M 58,110 Q 70,100 80,95" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M 142,110 Q 130,100 120,95" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        
+        <path d="M 50,45 Q 60,35 70,40 Q 60,30 55,15 Q 50,30 40,30 Q 50,35 50,45" fill="none" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+        <circle cx="35" cy="50" r="2" fill="var(--color-primary)" />
+        <circle cx="65" cy="20" r="2" fill="var(--color-primary)" />
+      </svg>
+    `;
+  } else if (state.view === 'registrants') {
+    /* Doodle 2: Looking at laptop (List view) */
+    characterSvg = `
+      <svg class="doodle-character animate-fade-in" viewBox="0 0 200 200" width="150" height="150" style="margin: 0 auto; display: block;">
+        <path d="M 90,35 Q 110,40 135,100 Q 145,120 130,135 Q 110,140 85,138 Q 60,140 50,130 Q 40,115 50,95 Z" fill="var(--color-accent-purple)" opacity="0.95" />
+        <path d="M 135,108 L 175,105 L 180,75 L 140,78 Z" fill="var(--color-accent-lime)" opacity="0.9" />
+        
+        <path d="M 70,138 L 70,175 Q 65,180 55,180" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M 105,138 L 105,175 Q 110,180 120,180" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        <line x1="40" y1="180" x2="160" y2="180" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" />
+        
+        <path d="M 90,35 Q 110,40 135,100 Q 145,120 130,135 Q 110,140 85,138 Q 60,140 50,130 Q 40,115 50,95 Z" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        
+        <circle cx="102" cy="74" r="3" fill="var(--color-primary)" />
+        <circle cx="118" cy="74" r="3" fill="var(--color-primary)" />
+        <circle cx="110" cy="84" r="4" fill="none" stroke="var(--color-primary)" stroke-width="3" />
+        
+        <path d="M 85,105 L 125,92 Q 135,90 145,95 Q 148,98 140,102 L 100,112" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M 105,120 Q 125,125 140,115" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        
+        <path d="M 130,110 L 170,107 L 180,72 L 140,75 Z" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M 130,110 L 170,107 L 175,114 L 135,117 Z" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    `;
+  } else {
+    /* Doodle 1: Waving with camera (Booking view) */
+    characterSvg = `
+      <svg class="doodle-character animate-fade-in" viewBox="0 0 200 200" width="150" height="150" style="margin: 0 auto; display: block;">
+        <path d="M 100,35 Q 120,40 145,100 Q 155,120 145,135 Q 135,145 100,140 Q 65,145 55,135 Q 45,120 55,100 Z" fill="var(--color-accent-purple)" opacity="0.95" />
+        <rect x="110" y="95" width="40" height="28" rx="6" fill="var(--color-accent-lime)" />
+        <circle cx="130" cy="109" r="10" fill="#ffffff" />
+        
+        <path d="M 80,140 L 80,175 Q 75,180 65,180" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M 115,140 L 115,175 Q 120,180 130,180" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        <line x1="50" y1="180" x2="150" y2="180" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" />
+        
+        <path d="M 100,35 Q 120,40 145,100 Q 155,120 145,135 Q 135,145 100,140 Q 65,145 55,135 Q 45,120 55,100 Z" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        
+        <circle cx="92" cy="78" r="3" fill="var(--color-primary)" />
+        <circle cx="108" cy="78" r="3" fill="var(--color-primary)" />
+        <path d="M 96,86 Q 100,90 104,86" fill="none" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" />
+        
+        <path d="M 58,105 Q 35,90 20,100 Q 15,105 20,110 Q 30,105 52,112" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        
+        <path d="M 135,115 Q 125,125 110,120" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M 142,105 Q 155,90 140,85" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        
+        <rect x="110" y="95" width="40" height="28" rx="6" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        <circle cx="130" cy="109" r="10" fill="none" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" />
+      </svg>
+    `;
+  }
+
   return `
     <div class="studio-sidebar-card" style="padding: var(--space-6) var(--space-5);">
       <div style="text-align:center; margin-bottom:var(--space-4);">
-        <svg class="doodle-camera animate-fade-in" viewBox="0 0 200 200" width="140" height="140" style="margin: 0 auto; display: block;">
-          <!-- Offset Color Fills -->
-          <rect x="42" y="62" width="110" height="80" rx="16" fill="var(--color-accent-purple)" opacity="0.95" />
-          <rect x="75" y="38" width="40" height="20" rx="4" fill="var(--color-accent-lime)" opacity="0.95" />
-          <circle cx="97" cy="102" r="32" fill="#ffffff" />
-          
-          <!-- Outlines -->
-          <rect x="45" y="60" width="110" height="80" rx="16" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-          <rect x="80" y="40" width="40" height="20" rx="4" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-          <path d="M 55,60 L 55,50 L 67,50 L 67,60" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-          <circle cx="100" cy="100" r="30" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-          <circle cx="100" cy="100" r="18" fill="none" stroke="var(--color-primary)" stroke-width="3" stroke-dasharray="4 2" />
-          
-          <!-- smiley face -->
-          <circle cx="92" cy="96" r="3" fill="var(--color-primary)" />
-          <circle cx="108" cy="96" r="3" fill="var(--color-primary)" />
-          <path d="M 94,106 Q 100,112 106,106" fill="none" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" />
-          
-          <!-- Waving Arms -->
-          <path d="M 45,95 Q 25,85 15,95 Q 10,100 15,105 Q 25,100 45,100" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-          <path d="M 155,95 Q 175,80 185,60 Q 190,55 183,50 Q 175,60 155,90" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-          
-          <!-- Legs -->
-          <path d="M 80,140 L 80,170 Q 75,175 65,175" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-          <path d="M 120,140 L 120,170 Q 125,175 135,175" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-          <line x1="50" y1="175" x2="150" y2="175" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" />
-        </svg>
+        ${characterSvg}
       </div>
       
       <div class="sidebar-content" style="padding:0; text-align:right;">
