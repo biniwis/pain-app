@@ -1,12 +1,11 @@
 const app = document.getElementById('app');
-const pageTitle = document.getElementById('page-title');
-const pageSubtitle = document.getElementById('page-subtitle');
-
 const eventSlug = new URLSearchParams(location.search).get('event');
 
 const state = {
   event: null,
   slots: [],
+  dates: [],
+  selectedDate: null,
   selectedSlotId: null,
   error: null,
   submitting: false,
@@ -16,18 +15,23 @@ const state = {
   registrants: null,
 };
 
+/* ── Helpers ── */
+
 function formatDate(dateStr) {
   const date = new Date(dateStr + 'T00:00:00');
   return date.toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long' });
 }
 
-function groupByDate(slots) {
-  const groups = new Map();
-  for (const slot of slots) {
-    if (!groups.has(slot.date)) groups.set(slot.date, []);
-    groups.get(slot.date).push(slot);
-  }
-  return groups;
+function formatDateShort(dateStr) {
+  const date = new Date(dateStr + 'T00:00:00');
+  return date.toLocaleDateString('he-IL', { day: 'numeric', month: 'short' });
+}
+
+function getDayNameShort(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  const day = d.getDay();
+  const days = ['א\'', 'ב\'', 'ג\'', 'ד\'', 'ה\'', 'ו\'', 'ש\''];
+  return days[day];
 }
 
 async function loadEventAndSlots() {
@@ -44,17 +48,32 @@ async function loadEventAndSlots() {
 
   const slotsRes = await fetch(`/api/events/${eventSlug}/slots`);
   state.slots = await slotsRes.json();
+
+  /* extract unique dates */
+  const uniqueDates = [...new Set(state.slots.map(s => s.date))].sort();
+  state.dates = uniqueDates;
+  if (uniqueDates.length > 0 && !state.selectedDate) {
+    state.selectedDate = uniqueDates[0];
+  }
 }
+
+/* ── Rendering ── */
 
 function render() {
   if (state.invalidLink) {
-    app.innerHTML = '<div class="card"><p class="error">הקישור אינו תקין. נא לבדוק עם השולח ולנסות שוב.</p></div>';
+    app.innerHTML = `
+      <div class="error-container animated-fade-in" style="max-width:480px; margin:80px auto; text-align:center;">
+        <div class="card" style="padding:var(--space-6);">
+          <p class="error" style="margin:0;">הקישור שברשותך אינו תקין. אנא פנה למנהל האירוע לקבלת קישור מעודכן.</p>
+        </div>
+      </div>
+    `;
     return;
   }
 
-  pageTitle.textContent = `קביעת תור - ${state.event.name}`;
-  pageSubtitle.textContent = 'בחרו תאריך ושעה פנויים, מלאו כמה פרטים ואנחנו נסמן לכם את התור.';
+  if (!state.event) return;
 
+  /* Tabs segmented control */
   const tabsHtml = `
     <div class="segmented-control-wrapper">
       <div class="segmented-control">
@@ -64,43 +83,115 @@ function render() {
     </div>
   `;
 
+  let mainPanelHtml = '';
+
   if (state.view === 'registrants' && !state.confirmed) {
-    renderRegistrantsList(tabsHtml);
-    return;
+    mainPanelHtml = renderRegistrantsListPanel(tabsHtml);
+  } else if (state.confirmed) {
+    mainPanelHtml = renderConfirmationPanel();
+  } else {
+    mainPanelHtml = renderBookingPanel(tabsHtml);
   }
 
-  if (state.confirmed) {
-    renderConfirmation();
-    return;
-  }
+  /* Sidebar info card */
+  const sidebarHtml = renderSidebarCard();
 
-  const groups = groupByDate(state.slots);
+  /* Main Grid Layout */
+  app.innerHTML = `
+    <div class="booking-grid-layout animated-fade-in">
+      <div class="booking-main-panel">
+        ${mainPanelHtml}
+      </div>
+      <div class="booking-sidebar-panel">
+        ${sidebarHtml}
+      </div>
+    </div>
+  `;
 
+  attachTabListeners();
+  attachBookingListeners();
+}
+
+/* ── Panels Generators ── */
+
+function renderBookingPanel(tabsHtml) {
   if (state.slots.length === 0) {
-    app.innerHTML = tabsHtml + '<div class="card"><p class="muted">אין כרגע תורים פנויים. נסו לבדוק שוב מאוחר יותר.</p></div>';
-    attachTabListeners();
-    return;
+    return `
+      ${tabsHtml}
+      <div class="card" style="text-align:center; padding:var(--space-8) var(--space-4);">
+        <svg viewBox="0 0 24 24" width="48" height="48" stroke="var(--color-text-muted)" stroke-width="1.5" fill="none" style="margin-bottom:var(--space-3);"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        <h3 style="color:var(--color-primary); margin-bottom:var(--space-2);">אין תורים פנויים</h3>
+        <p class="muted">כרגע לא הוגדרו שעות פנויות לאירוע זה. אנא בדקו שוב מאוחר יותר.</p>
+      </div>
+    `;
   }
 
-  let html = tabsHtml;
-  for (const [date, slots] of groups) {
-    html += `<div class="date-group card"><h2>${formatDate(date)}</h2><div class="slot-buttons">`;
-    for (const slot of slots) {
-      const selected = slot.id === state.selectedSlotId ? 'selected' : '';
-      html += `<button type="button" class="slot ${selected}" data-slot-id="${slot.id}">${slot.start_time}</button>`;
+  /* Date selector chips (carousel style) */
+  let dateChipsHtml = '';
+  for (const date of state.dates) {
+    const isSelected = date === state.selectedDate;
+    const dayName = getDayNameShort(date);
+    const dayNum = date.split('-')[2];
+    dateChipsHtml += `
+      <button type="button" class="date-carousel-chip ${isSelected ? 'active' : ''}" data-carousel-date="${date}">
+        <span class="chip-day-name">${dayName}</span>
+        <span class="chip-day-num">${dayNum}</span>
+      </button>
+    `;
+  }
+
+  /* Slots for selected date */
+  const activeSlots = state.slots.filter(s => s.date === state.selectedDate);
+  const morningSlots = activeSlots.filter(s => parseInt(s.start_time.split(':')[0], 10) < 12);
+  const afternoonSlots = activeSlots.filter(s => parseInt(s.start_time.split(':')[0], 10) >= 12);
+
+  let slotsSectionsHtml = '';
+
+  if (activeSlots.length === 0) {
+    slotsSectionsHtml = `<p class="muted" style="text-align:center; padding:var(--space-6) 0;">כל התורים ליום זה נתפסו. בחרו תאריך אחר ↑</p>`;
+  } else {
+    if (morningSlots.length > 0) {
+      slotsSectionsHtml += `
+        <div class="time-section">
+          <div class="time-section-title">בוקר</div>
+          <div class="slot-buttons">
+            ${morningSlots.map(s => {
+              const selected = s.id === state.selectedSlotId ? 'selected' : '';
+              return `<button type="button" class="slot ${selected}" data-slot-id="${s.id}">${s.start_time}</button>`;
+            }).join('')}
+          </div>
+        </div>
+      `;
     }
-    html += '</div></div>';
+    if (afternoonSlots.length > 0) {
+      slotsSectionsHtml += `
+        <div class="time-section" style="margin-top:var(--space-4);">
+          <div class="time-section-title">אחר הצהריים</div>
+          <div class="slot-buttons">
+            ${afternoonSlots.map(s => {
+              const selected = s.id === state.selectedSlotId ? 'selected' : '';
+              return `<button type="button" class="slot ${selected}" data-slot-id="${s.id}">${s.start_time}</button>`;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
   }
 
+  /* Booking form card */
+  let formCardHtml = '';
   if (state.selectedSlotId) {
-    const slot = state.slots.find((s) => s.id === state.selectedSlotId);
-    html += `
-      <div class="card" id="booking-form-card">
-        <h2>פרטים לתיאום התור (${formatDate(slot.date)}, ${slot.start_time})</h2>
+    const slot = state.slots.find(s => s.id === state.selectedSlotId);
+    formCardHtml += `
+      <div class="card booking-form-card animated-fade-in" id="booking-form-card" style="margin-top:var(--space-5);">
+        <h2>פרטים לתיאום התור</h2>
+        <p class="muted" style="margin-bottom:var(--space-4);">
+          קביעת תור ליום <strong>${formatDate(slot.date)}</strong> בשעה <strong>${slot.start_time}</strong>.
+        </p>
         ${state.error ? `<p class="error">${state.error}</p>` : ''}
         <form id="booking-form">
-          <label><span>שם מלא</span><input type="text" name="client_name" required autofocus /></label>
-          <div class="actions-row">
+          <label><span>שם מלא</span><input type="text" name="client_name" placeholder="הקלידו את שמכם" required autofocus /></label>
+          <div class="actions-row" style="margin-top:var(--space-4);">
             <button type="submit" class="primary" ${state.submitting ? 'disabled' : ''}>אישור קביעת תור</button>
             <button type="button" class="secondary" id="cancel-selection">ביטול</button>
           </div>
@@ -109,32 +200,145 @@ function render() {
     `;
   }
 
-  app.innerHTML = html;
-  attachTabListeners();
+  return `
+    ${tabsHtml}
+    <div class="card booking-selector-card">
+      <div class="card-inner-header" style="margin-bottom:var(--space-5);">
+        <h2>בחירת מועד לצילום</h2>
+        <p class="muted">בחרו את היום והשעה הנוחים לכם מתוך השעות הפנויות ביומן.</p>
+      </div>
 
-  app.querySelectorAll('button.slot').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      state.selectedSlotId = Number(btn.dataset.slotId);
-      state.error = null;
-      render();
-      document.getElementById('booking-form-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-  });
+      <div class="date-carousel-wrapper">
+        <div class="date-carousel">
+          ${dateChipsHtml}
+        </div>
+      </div>
 
-  const cancelBtn = document.getElementById('cancel-selection');
-  if (cancelBtn) {
-    cancelBtn.addEventListener('click', () => {
-      state.selectedSlotId = null;
-      state.error = null;
-      render();
-    });
-  }
+      <div class="slots-container-box" style="margin-top:var(--space-4);">
+        ${slotsSectionsHtml}
+      </div>
+    </div>
 
-  const form = document.getElementById('booking-form');
-  if (form) {
-    form.addEventListener('submit', handleSubmit);
-  }
+    ${formCardHtml}
+  `;
 }
+
+function renderRegistrantsListPanel(tabsHtml) {
+  const rows = (state.registrants || [])
+    .map(
+      (b) => `
+        <tr>
+          <td>${formatDateShort(b.date)}</td>
+          <td>${b.start_time}</td>
+          <td>
+            <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+              <strong>${b.client_name}</strong>
+              <div style="display:inline-flex; gap:6px;">
+                <button type="button" class="link" data-edit-booking="${b.id}" data-current-name="${b.client_name}" style="padding:0 6px; font-size:var(--font-size-xs); color:var(--color-text-secondary);">עריכה</button>
+                <button type="button" class="link" data-cancel-booking="${b.id}" style="padding:0 6px; font-size:var(--font-size-xs);">ביטול</button>
+              </div>
+            </div>
+          </td>
+        </tr>
+      `
+    )
+    .join('');
+
+  return `
+    ${tabsHtml}
+    <div class="card">
+      <div class="card-inner-header" style="margin-bottom:var(--space-4);">
+        <h2>רשימת המשתתפים שנרשמו</h2>
+        <p class="muted">ניתן לשנות שם או לבטל תור שנרשם במידת הצורך ישירות מהרשימה.</p>
+      </div>
+      <div class="table-responsive">
+        <table>
+          <thead><tr><th>תאריך</th><th>שעה</th><th>שם המשתתף</th></tr></thead>
+          <tbody>${rows || '<tr><td colspan="3" class="muted" style="text-align:center;">אין נרשמים עדיין לתאריך זה.</td></tr>'}</tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function renderConfirmationPanel() {
+  const { slot, client_name, event } = state.confirmed;
+  const icsArgs = { eventName: event.name, date: slot.date, startTime: slot.start_time, endTime: slot.end_time };
+
+  return `
+    <div class="card confirmation-card animated-fade-in">
+      <div class="success-icon-wrapper">
+        <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+          <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+          <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+        </svg>
+      </div>
+      <h2 class="confirmation-title">התור נקבע בהצלחה!</h2>
+      <p class="confirmation-subtitle">נתראה בסטודיו ביום <strong>${formatDate(slot.date)}</strong> בשעה <strong>${slot.start_time}</strong>.</p>
+      
+      <div class="calendar-integration-box">
+        <span class="integration-title">הוסיפו ליומן שלא תשכחו:</span>
+        <div class="actions-row central-actions">
+          <button type="button" class="btn-calendar ics" id="download-ics">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            הורדת תזכורת (ICS)
+          </button>
+          <a class="btn-calendar google" href="${googleCalendarLink(icsArgs)}" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" width="16" height="16"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+            Google Calendar
+          </a>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderSidebarCard() {
+  return `
+    <div class="studio-sidebar-card">
+      <div class="sidebar-banner-header"></div>
+      <div class="sidebar-avatar-wrapper">
+        <div class="sidebar-avatar">
+          <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+        </div>
+      </div>
+      
+      <div class="sidebar-content">
+        <h3 class="sidebar-title">${state.event.name}</h3>
+        <p class="sidebar-description">
+          צילומי פרופיל ותדמית מקצועיים בסטודיו. אנו נפיק עבורכם תמונה ייצוגית ואיכותית המתאימה לתיק העבודות, לאתר החברה ולרשתות החברתיות.
+        </p>
+
+        <div class="sidebar-meta-list">
+          <div class="meta-item">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            <span>משך פגישה: 15 דקות</span>
+          </div>
+          <div class="meta-item">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+            <span>מיקום: הסטודיו הראשי</span>
+          </div>
+        </div>
+
+        <div class="sidebar-prep-tips">
+          <h4>הנחיות הגעה וצילום:</h4>
+          <ul class="prep-bullet-list">
+            <li>
+              <strong>לבוש ייצוגי ונקי</strong>
+              <span>חולצה חלקה בצבע אחיד, ללא הדפסים, לוגואים בולטים או ציורים שיכולים להסיח את הדעת בתמונה.</span>
+            </li>
+            <li>
+              <strong>שיער ומראה מסודר</strong>
+              <span>סדרו את השיער והמראה הכללי כפי שתרצו להצטייר באופן מקצועי ואינטליגנטי.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* ── Event Listeners & Logic ── */
 
 function attachTabListeners() {
   const bookTab = document.getElementById('tab-book');
@@ -155,37 +359,60 @@ function attachTabListeners() {
   }
 }
 
-function renderRegistrantsList(tabsHtml) {
-  const rows = (state.registrants || [])
-    .map(
-      (b) => `
-        <tr>
-          <td>${formatDate(b.date)}</td>
-          <td>${b.start_time}</td>
-          <td>
-            <strong>${b.client_name}</strong>
-            <div style="display:inline-flex; gap:var(--space-2); margin-right:var(--space-3);">
-              <button type="button" class="link" data-edit-booking="${b.id}" data-current-name="${b.client_name}" style="padding:0 var(--space-1); font-size:var(--font-size-xs); color:var(--color-text-secondary);">עריכה</button>
-              <button type="button" class="link" data-cancel-booking="${b.id}" style="padding:0 var(--space-1); font-size:var(--font-size-xs);">ביטול</button>
-            </div>
-          </td>
-        </tr>
-      `
-    )
-    .join('');
+function attachBookingListeners() {
+  /* date chip click */
+  app.querySelectorAll('[data-carousel-date]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.selectedDate = btn.dataset.carouselDate;
+      state.selectedSlotId = null;
+      state.error = null;
+      render();
+    });
+  });
 
-  app.innerHTML = `
-    ${tabsHtml}
-    <div class="card">
-      <h2>מי כבר נרשם</h2>
-      <table>
-        <thead><tr><th>תאריך</th><th>שעה</th><th>שם (ניתן לעריכה וביטול)</th></tr></thead>
-        <tbody>${rows || '<tr><td colspan="3" class="muted">אין נרשמים עדיין</td></tr>'}</tbody>
-      </table>
-    </div>
-  `;
-  attachTabListeners();
+  /* time slot button click */
+  app.querySelectorAll('button.slot').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.selectedSlotId = Number(btn.dataset.slotId);
+      state.error = null;
+      render();
+      document.getElementById('booking-form-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  });
 
+  /* cancel selection */
+  const cancelBtn = document.getElementById('cancel-selection');
+  if (cancelBtn) {
+    cancelBtn.addEventListener('click', () => {
+      state.selectedSlotId = null;
+      state.error = null;
+      render();
+    });
+  }
+
+  /* form submit */
+  const form = document.getElementById('booking-form');
+  if (form) {
+    form.addEventListener('submit', handleSubmit);
+  }
+
+  /* download ics confirmation listener */
+  const downloadIcsBtn = document.getElementById('download-ics');
+  if (downloadIcsBtn && state.confirmed) {
+    const { slot, event } = state.confirmed;
+    const icsArgs = { eventName: event.name, date: slot.date, startTime: slot.start_time, endTime: slot.end_time };
+    downloadIcsBtn.addEventListener('click', () => {
+      const blob = new Blob([buildIcsContent(icsArgs)], { type: 'text/calendar' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'photo-session.ics';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+  }
+
+  /* public list edit booking */
   app.querySelectorAll('[data-edit-booking]').forEach(btn => {
     btn.addEventListener('click', async () => {
       const currentName = btn.dataset.currentName;
@@ -208,6 +435,7 @@ function renderRegistrantsList(tabsHtml) {
     });
   });
 
+  /* public list cancel booking */
   app.querySelectorAll('[data-cancel-booking]').forEach(btn => {
     btn.addEventListener('click', async () => {
       if (!confirm('האם ברצונך לבטל את התור הזה?')) return;
@@ -231,6 +459,8 @@ function renderRegistrantsList(tabsHtml) {
     });
   });
 }
+
+/* ── Calendar Generators ── */
 
 function pad(n) {
   return String(n).padStart(2, '0');
@@ -269,80 +499,10 @@ function googleCalendarLink({ eventName, date, startTime, endTime }) {
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
 
-function renderConfirmation() {
-  const { slot, client_name, event } = state.confirmed;
-  const icsArgs = { eventName: event.name, date: slot.date, startTime: slot.start_time, endTime: slot.end_time };
-
-  app.innerHTML = `
-    <div class="card confirmation-card animated-fade-in">
-      <div class="success-icon-wrapper">
-        <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
-          <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
-          <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
-        </svg>
-      </div>
-      <h2 class="confirmation-title">התור נקבע בהצלחה!</h2>
-      <p class="confirmation-subtitle">נתראה בסטודיו ביום <strong>${formatDate(slot.date)}</strong> בשעה <strong>${slot.start_time}</strong>.</p>
-      
-      <div class="calendar-integration-box">
-        <span class="integration-title">הוסיפו ליומן שלא תשכחו:</span>
-        <div class="actions-row central-actions">
-          <button type="button" class="btn-calendar ics" id="download-ics">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-            הורדת תזכורת (ICS)
-          </button>
-          <a class="btn-calendar google" href="${googleCalendarLink(icsArgs)}" target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24" width="16" height="16"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
-            Google Calendar
-          </a>
-        </div>
-      </div>
-    </div>
-    
-    <div class="card prep-card animated-fade-in delay-1">
-      <div class="prep-header">
-        <span class="prep-icon">✨</span>
-        <h3>איך מגיעים מוכנים לצילומים?</h3>
-      </div>
-      <div class="prep-items">
-        <div class="prep-item">
-          <div class="prep-item-number">1</div>
-          <div class="prep-item-content">
-            <strong>לבוש ייצוגי ונקי</strong>
-            <p>חולצה חלקה בצבע אחיד (עדיף להימנע מצבעים זרחניים). ללא הדפסים, לוגואים גדולים או ציורים בולטים.</p>
-          </div>
-        </div>
-        <div class="prep-item">
-          <div class="prep-item-number">2</div>
-          <div class="prep-item-content">
-            <strong>שיער ומראה מסודר</strong>
-            <p>סדרו את השיער והמראה הכללי כפי שתרצו להצטייר באופן מקצועי בתיק העבודות או באתר החברה.</p>
-          </div>
-        </div>
-      </div>
-      <div class="prep-footer">
-        <p>הצילום עצמו קצר וקל — פשוט תגיעו עם חיוך ואנחנו נדאג לכל השאר.</p>
-      </div>
-    </div>
-  `;
-
-  document.getElementById('download-ics').addEventListener('click', () => {
-    const blob = new Blob([buildIcsContent(icsArgs)], { type: 'text/calendar' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'photo-session.ics';
-    a.click();
-    URL.revokeObjectURL(url);
-  });
-}
-
 async function handleSubmit(e) {
   e.preventDefault();
   const form = e.target;
   const data = Object.fromEntries(new FormData(form).entries());
-
-
 
   state.submitting = true;
   state.error = null;
@@ -379,6 +539,8 @@ async function handleSubmit(e) {
     render();
   }
 }
+
+/* ── Initialization ── */
 
 (async function init() {
   await loadEventAndSlots();
