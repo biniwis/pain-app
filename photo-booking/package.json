@@ -1,0 +1,16 @@
+{
+  "name": "photo-booking",
+  "version": "1.0.0",
+  "description": "Self-serve booking page for photo session time slots.",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.11.1",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
+  }
+}
