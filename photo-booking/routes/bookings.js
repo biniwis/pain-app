@@ -70,4 +70,17 @@ adminRouter.patch('/:id', (req, res) => {
   res.json({ ok: true });
 });
 
+adminRouter.delete('/:id', (req, res) => {
+  const booking = db.prepare('SELECT * FROM bookings WHERE id = ?').get(req.params.id);
+  if (!booking) {
+    return res.status(404).json({ error: 'Booking not found' });
+  }
+  const deleteBooking = db.transaction(() => {
+    db.prepare('DELETE FROM bookings WHERE id = ?').run(req.params.id);
+    db.prepare('UPDATE slots SET is_booked = 0 WHERE id = ?').run(booking.slot_id);
+  });
+  deleteBooking();
+  res.json({ ok: true });
+});
+
 module.exports = { publicRouter, adminRouter };
