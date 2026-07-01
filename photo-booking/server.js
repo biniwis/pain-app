@@ -23,6 +23,13 @@ app.use('/api/admin/slots', requireAdmin, slotsAdminRouter);
 app.use('/api/admin/bookings', requireAdmin, bookingsAdminRouter);
 
 const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`Photo booking server listening on http://localhost:${port}`);
-});
+const db = require('./db');
+
+async function startServer() {
+  await db.initDatabase();
+  app.listen(port, () => {
+    console.log(`Photo booking server listening on http://localhost:${port}`);
+  });
+}
+
+startServer();
