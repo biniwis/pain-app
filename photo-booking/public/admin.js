@@ -97,7 +97,9 @@ function renderEventsList() {
         <label><span>קישור לשיתוף</span><input type="text" readonly value="${bookingLink(ev.slug)}" data-copy-link="${ev.slug}" /></label>
         <div class="actions-row">
           <button type="button" class="secondary" data-copy="${ev.slug}">העתקת קישור</button>
+          <button type="button" class="secondary" data-rename="${ev.id}">שינוי שם</button>
           <button type="button" class="primary" data-manage="${ev.id}">ניהול</button>
+          <button type="button" class="link" data-delete-event="${ev.id}">מחיקת אירוע</button>
         </div>
       </div>
     `
@@ -159,6 +161,40 @@ function renderEventsList() {
       render();
     });
   });
+
+  app.querySelectorAll('[data-rename]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const eventId = btn.dataset.rename;
+      const event = state.events.find((ev) => String(ev.id) === eventId);
+      const newName = prompt('שם חדש לאירוע:', event.name);
+      if (!newName || !newName.trim() || newName.trim() === event.name) return;
+      const res = await fetch(`/api/admin/events/${eventId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        body: JSON.stringify({ name: newName.trim() }),
+      });
+      if (res.ok) {
+        await loadEvents();
+        render();
+      }
+    });
+  });
+
+  app.querySelectorAll('[data-delete-event]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const eventId = btn.dataset.deleteEvent;
+      const event = state.events.find((ev) => String(ev.id) === eventId);
+      if (!confirm(`למחוק את האירוע "${event.name}"? כל התורים וההזמנות שלו יימחקו לצמיתות.`)) return;
+      const res = await fetch(`/api/admin/events/${eventId}`, {
+        method: 'DELETE',
+        headers: authHeaders(),
+      });
+      if (res.ok) {
+        await loadEvents();
+        render();
+      }
+    });
+  });
 }
 
 function renderEventDetail() {
@@ -190,6 +226,7 @@ function renderEventDetail() {
             <span style="display:inline;">הגיע/ה</span>
           </label>
         </td>
+        <td><button type="button" class="link" data-delete-booking-id="${b.id}">מחיקה</button></td>
       </tr>
     `
     )
@@ -201,7 +238,11 @@ function renderEventDetail() {
     <div class="card">
       <h2>${ev.name}</h2>
       <label><span>קישור לשיתוף עם הלקוח</span><input type="text" readonly value="${bookingLink(ev.slug)}" /></label>
-      <button type="button" class="secondary" id="copy-detail-link">העתקת קישור</button>
+      <div class="actions-row">
+        <button type="button" class="secondary" id="copy-detail-link">העתקת קישור</button>
+        <button type="button" class="secondary" id="rename-event-detail">שינוי שם</button>
+        <button type="button" class="link" id="delete-event-detail">מחיקת האירוע</button>
+      </div>
     </div>
 
     <div class="card">
@@ -213,6 +254,8 @@ function renderEventDetail() {
         <label><span>משעה</span><input type="time" name="start_time" required /></label>
         <label><span>עד שעה</span><input type="time" name="end_time" required /></label>
         <label><span>משך כל תור (בדקות)</span><input type="number" name="duration_minutes" min="1" value="15" required /></label>
+        <label><span>הפסקה מ- (אופציונלי)</span><input type="time" name="break_start" /></label>
+        <label><span>הפסקה עד (אופציונלי)</span><input type="time" name="break_end" /></label>
         <button type="submit" class="primary">יצירת תורים</button>
       </form>
     </div>
@@ -228,8 +271,8 @@ function renderEventDetail() {
     <div class="card">
       <h2>הזמנות</h2>
       <table>
-        <thead><tr><th>תאריך</th><th>שעה</th><th>שם</th><th>פרטי קשר</th><th>מחלקה</th><th>הגעה</th></tr></thead>
-        <tbody>${bookingRows || '<tr><td colspan="6" class="muted">אין הזמנות עדיין</td></tr>'}</tbody>
+        <thead><tr><th>תאריך</th><th>שעה</th><th>שם</th><th>פרטי קשר</th><th>מחלקה</th><th>הגעה</th><th></th></tr></thead>
+        <tbody>${bookingRows || '<tr><td colspan="7" class="muted">אין הזמנות עדיין</td></tr>'}</tbody>
       </table>
     </div>
   `;
@@ -245,6 +288,31 @@ function renderEventDetail() {
     await navigator.clipboard.writeText(bookingLink(ev.slug));
     e.target.textContent = 'הועתק!';
     setTimeout(() => (e.target.textContent = 'העתקת קישור'), 1500);
+  });
+
+  document.getElementById('rename-event-detail').addEventListener('click', async () => {
+    const newName = prompt('שם חדש לאירוע:', ev.name);
+    if (!newName || !newName.trim() || newName.trim() === ev.name) return;
+    const res = await fetch(`/api/admin/events/${ev.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
+      body: JSON.stringify({ name: newName.trim() }),
+    });
+    if (res.ok) {
+      state.currentEvent = { ...ev, name: newName.trim() };
+      render();
+    }
+  });
+
+  document.getElementById('delete-event-detail').addEventListener('click', async () => {
+    if (!confirm(`למחוק את האירוע "${ev.name}"? כל התורים וההזמנות שלו יימחקו לצמיתות.`)) return;
+    const res = await fetch(`/api/admin/events/${ev.id}`, { method: 'DELETE', headers: authHeaders() });
+    if (res.ok) {
+      state.view = 'events';
+      state.currentEvent = null;
+      await loadEvents();
+      render();
+    }
   });
 
   document.querySelectorAll('[data-delete-id]').forEach((btn) => {
@@ -268,6 +336,18 @@ function renderEventDetail() {
         headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify({ attended: checkbox.checked }),
       });
+    });
+  });
+
+  document.querySelectorAll('[data-delete-booking-id]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('למחוק את ההזמנה הזו? התור יתפנה מחדש.')) return;
+      const id = btn.dataset.deleteBookingId;
+      const res = await fetch(`/api/admin/bookings/${id}`, { method: 'DELETE', headers: authHeaders() });
+      if (res.ok) {
+        await loadEventDetail(ev.id);
+        render();
+      }
     });
   });
 
