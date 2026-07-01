@@ -244,33 +244,42 @@ function renderConfirmationPanel() {
 
 function renderSidebarCard() {
   return `
-    <div class="studio-sidebar-card">
-      <div class="sidebar-banner-header"></div>
-      <div class="sidebar-avatar-wrapper">
-        <div class="sidebar-avatar">
-          <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-        </div>
+    <div class="studio-sidebar-card" style="padding: var(--space-6) var(--space-5);">
+      <div style="text-align:center; margin-bottom:var(--space-4);">
+        <svg class="doodle-camera animate-fade-in" viewBox="0 0 200 200" width="140" height="140" style="margin: 0 auto; display: block;">
+          <!-- Offset Color Fills -->
+          <rect x="42" y="62" width="110" height="80" rx="16" fill="var(--color-accent-purple)" opacity="0.95" />
+          <rect x="75" y="38" width="40" height="20" rx="4" fill="var(--color-accent-lime)" opacity="0.95" />
+          <circle cx="97" cy="102" r="32" fill="#ffffff" />
+          
+          <!-- Outlines -->
+          <rect x="45" y="60" width="110" height="80" rx="16" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+          <rect x="80" y="40" width="40" height="20" rx="4" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M 55,60 L 55,50 L 67,50 L 67,60" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+          <circle cx="100" cy="100" r="30" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+          <circle cx="100" cy="100" r="18" fill="none" stroke="var(--color-primary)" stroke-width="3" stroke-dasharray="4 2" />
+          
+          <!-- smiley face -->
+          <circle cx="92" cy="96" r="3" fill="var(--color-primary)" />
+          <circle cx="108" cy="96" r="3" fill="var(--color-primary)" />
+          <path d="M 94,106 Q 100,112 106,106" fill="none" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" />
+          
+          <!-- Waving Arms -->
+          <path d="M 45,95 Q 25,85 15,95 Q 10,100 15,105 Q 25,100 45,100" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M 155,95 Q 175,80 185,60 Q 190,55 183,50 Q 175,60 155,90" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+          
+          <!-- Legs -->
+          <path d="M 80,140 L 80,170 Q 75,175 65,175" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M 120,140 L 120,170 Q 125,175 135,175" fill="none" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+          <line x1="50" y1="175" x2="150" y2="175" stroke="var(--color-primary)" stroke-width="4" stroke-linecap="round" />
+        </svg>
       </div>
       
-      <div class="sidebar-content">
-        <h3 class="sidebar-title">${state.event.name}</h3>
-        <p class="sidebar-description">
-          צילומי פרופיל ותדמית מקצועיים בסטודיו. אנו נפיק עבורכם תמונה ייצוגית ואיכותית המתאימה לתיק העבודות, לאתר החברה ולרשתות החברתיות.
-        </p>
+      <div class="sidebar-content" style="padding:0; text-align:right;">
+        <h3 class="sidebar-title" style="text-align:center; font-size:var(--font-size-xl); margin-bottom:var(--space-4);">${state.event.name}</h3>
 
-        <div class="sidebar-meta-list">
-          <div class="meta-item">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-            <span>משך פגישה: 15 דקות</span>
-          </div>
-          <div class="meta-item">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-            <span>מיקום: הסטודיו הראשי</span>
-          </div>
-        </div>
-
-        <div class="sidebar-prep-tips">
-          <h4>הנחיות הגעה וצילום:</h4>
+        <div class="sidebar-prep-tips" style="border-top:1px solid var(--color-border-light); padding-top:var(--space-4);">
+          <h4 style="font-size:var(--font-size-md); margin-bottom:var(--space-3); color:var(--color-primary);">הנחיות הגעה וצילום:</h4>
           <ul class="prep-bullet-list">
             <li>
               <strong>לבוש ייצוגי ונקי</strong>
