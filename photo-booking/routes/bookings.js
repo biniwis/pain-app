@@ -70,6 +70,19 @@ publicRouter.delete('/:id', (req, res) => {
   res.json({ ok: true });
 });
 
+publicRouter.patch('/:id', (req, res) => {
+  const booking = db.prepare('SELECT * FROM bookings WHERE id = ?').get(req.params.id);
+  if (!booking) {
+    return res.status(404).json({ error: 'Booking not found' });
+  }
+  const { client_name } = req.body || {};
+  if (!client_name || !client_name.trim()) {
+    return res.status(400).json({ error: 'Name is required' });
+  }
+  db.prepare('UPDATE bookings SET client_name = ? WHERE id = ?').run(client_name.trim(), req.params.id);
+  res.json({ ok: true });
+});
+
 adminRouter.patch('/:id', (req, res) => {
   const booking = db.prepare('SELECT * FROM bookings WHERE id = ?').get(req.params.id);
   if (!booking) {

@@ -156,22 +156,21 @@ function attachTabListeners() {
 }
 
 function renderRegistrantsList(tabsHtml) {
-  const myBookingId = localStorage.getItem(`booking_${eventSlug}`);
   const rows = (state.registrants || [])
     .map(
-      (b) => {
-        const isMine = myBookingId && String(b.id) === String(myBookingId);
-        const cancelBtn = isMine 
-          ? `<button type="button" class="link" data-cancel-my-booking="${b.id}" style="margin-right:8px; padding:2px var(--space-2); font-size:var(--font-size-xs);">ביטול רישום</button>` 
-          : '';
-        return `
-          <tr>
-            <td>${formatDate(b.date)}</td>
-            <td>${b.start_time}</td>
-            <td><strong>${b.client_name}</strong>${cancelBtn}</td>
-          </tr>
-        `;
-      }
+      (b) => `
+        <tr>
+          <td>${formatDate(b.date)}</td>
+          <td>${b.start_time}</td>
+          <td>
+            <strong>${b.client_name}</strong>
+            <div style="display:inline-flex; gap:var(--space-2); margin-right:var(--space-3);">
+              <button type="button" class="link" data-edit-booking="${b.id}" data-current-name="${b.client_name}" style="padding:0 var(--space-1); font-size:var(--font-size-xs); color:var(--color-text-secondary);">עריכה</button>
+              <button type="button" class="link" data-cancel-booking="${b.id}" style="padding:0 var(--space-1); font-size:var(--font-size-xs);">ביטול</button>
+            </div>
+          </td>
+        </tr>
+      `
     )
     .join('');
 
@@ -180,27 +179,51 @@ function renderRegistrantsList(tabsHtml) {
     <div class="card">
       <h2>מי כבר נרשם</h2>
       <table>
-        <thead><tr><th>תאריך</th><th>שעה</th><th>שם</th></tr></thead>
+        <thead><tr><th>תאריך</th><th>שעה</th><th>שם (ניתן לעריכה וביטול)</th></tr></thead>
         <tbody>${rows || '<tr><td colspan="3" class="muted">אין נרשמים עדיין</td></tr>'}</tbody>
       </table>
     </div>
   `;
   attachTabListeners();
 
-  app.querySelectorAll('[data-cancel-my-booking]').forEach(btn => {
+  app.querySelectorAll('[data-edit-booking]').forEach(btn => {
     btn.addEventListener('click', async () => {
-      if (!confirm('האם ברצונך לבטל את התור שקבעת?')) return;
-      const res = await fetch(`/api/bookings/${btn.dataset.cancelMyBooking}`, {
+      const currentName = btn.dataset.currentName;
+      const newName = prompt('שינוי שם הרשום:', currentName);
+      if (!newName || !newName.trim() || newName.trim() === currentName) return;
+
+      const res = await fetch(`/api/bookings/${btn.dataset.editBooking}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ client_name: newName.trim() })
+      });
+
+      if (res.ok) {
+        const resBookings = await fetch(`/api/events/${eventSlug}/bookings`);
+        state.registrants = await resBookings.json();
+        render();
+      } else {
+        alert('משהו השתבש בעדכון השם.');
+      }
+    });
+  });
+
+  app.querySelectorAll('[data-cancel-booking]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('האם ברצונך לבטל את התור הזה?')) return;
+      const res = await fetch(`/api/bookings/${btn.dataset.cancelBooking}`, {
         method: 'DELETE'
       });
       if (res.ok) {
-        localStorage.removeItem(`booking_${eventSlug}`);
+        const myBookingId = localStorage.getItem(`booking_${eventSlug}`);
+        if (myBookingId && String(myBookingId) === String(btn.dataset.cancelBooking)) {
+          localStorage.removeItem(`booking_${eventSlug}`);
+        }
         await loadEventAndSlots();
         const resBookings = await fetch(`/api/events/${eventSlug}/bookings`);
         state.registrants = await resBookings.json();
         state.selectedSlotId = null;
         state.confirmed = null;
-        state.view = 'book';
         render();
       } else {
         alert('משהו השתבש בביטול התור.');
