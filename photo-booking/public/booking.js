@@ -56,9 +56,11 @@ function render() {
   pageSubtitle.textContent = 'בחרו תאריך ושעה פנויים, מלאו כמה פרטים ואנחנו נסמן לכם את התור.';
 
   const tabsHtml = `
-    <div class="actions-row" style="justify-content:center; margin-bottom:16px;">
-      <button type="button" class="${state.view === 'book' ? 'primary' : 'secondary'}" id="tab-book">קביעת תור</button>
-      <button type="button" class="${state.view === 'registrants' ? 'primary' : 'secondary'}" id="tab-registrants">מי כבר נרשם</button>
+    <div class="segmented-control-wrapper">
+      <div class="segmented-control">
+        <button type="button" class="control-btn ${state.view === 'book' ? 'active' : ''}" id="tab-book">קביעת תור</button>
+        <button type="button" class="control-btn ${state.view === 'registrants' ? 'active' : ''}" id="tab-registrants">מי כבר נרשם</button>
+      </div>
     </div>
   `;
 
@@ -249,23 +251,55 @@ function renderConfirmation() {
   const icsArgs = { eventName: event.name, date: slot.date, startTime: slot.start_time, endTime: slot.end_time };
 
   app.innerHTML = `
-    <div class="card confirmation">
-      <h2>התור נקבע בהצלחה!</h2>
-      <p>${client_name}, נתראה ב-${formatDate(slot.date)} בשעה ${slot.start_time}.</p>
-      <div class="actions-row" style="justify-content:center">
-        <button type="button" class="secondary" id="download-ics">הוספה ליומן (ICS)</button>
-        <a class="secondary" style="text-decoration:none; display:inline-block" href="${googleCalendarLink(
-          icsArgs
-        )}" target="_blank" rel="noopener">Google Calendar</a>
+    <div class="card confirmation-card animated-fade-in">
+      <div class="success-icon-wrapper">
+        <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+          <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+          <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+        </svg>
+      </div>
+      <h2 class="confirmation-title">התור נקבע בהצלחה!</h2>
+      <p class="confirmation-subtitle">נתראה בסטודיו ביום <strong>${formatDate(slot.date)}</strong> בשעה <strong>${slot.start_time}</strong>.</p>
+      
+      <div class="calendar-integration-box">
+        <span class="integration-title">הוסיפו ליומן שלא תשכחו:</span>
+        <div class="actions-row central-actions">
+          <button type="button" class="btn-calendar ics" id="download-ics">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            הורדת תזכורת (ICS)
+          </button>
+          <a class="btn-calendar google" href="${googleCalendarLink(icsArgs)}" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" width="16" height="16"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+            Google Calendar
+          </a>
+        </div>
       </div>
     </div>
-    <div class="card prep-tips">
-      <h2>איך מגיעים מוכנים? 📸</h2>
-      <ul>
-        <li><strong>לבוש ייצוגי ונקי</strong> — חולצה חלקה בצבע אחיד, ללא הדפסים, לוגואים או ציורים בולטים.</li>
-        <li><strong>שיער מסודר</strong> — כפי שתרצו להיראות באופן מקצועי. זה הזמן להגיע עם הלוק שמייצג אתכם.</li>
-      </ul>
-      <p class="muted">הצילום עצמו קצר וקל — פשוט תגיעו עם חיוך ואנחנו נדאג לכל השאר.</p>
+    
+    <div class="card prep-card animated-fade-in delay-1">
+      <div class="prep-header">
+        <span class="prep-icon">✨</span>
+        <h3>איך מגיעים מוכנים לצילומים?</h3>
+      </div>
+      <div class="prep-items">
+        <div class="prep-item">
+          <div class="prep-item-number">1</div>
+          <div class="prep-item-content">
+            <strong>לבוש ייצוגי ונקי</strong>
+            <p>חולצה חלקה בצבע אחיד (עדיף להימנע מצבעים זרחניים). ללא הדפסים, לוגואים גדולים או ציורים בולטים.</p>
+          </div>
+        </div>
+        <div class="prep-item">
+          <div class="prep-item-number">2</div>
+          <div class="prep-item-content">
+            <strong>שיער ומראה מסודר</strong>
+            <p>סדרו את השיער והמראה הכללי כפי שתרצו להצטייר באופן מקצועי בתיק העבודות או באתר החברה.</p>
+          </div>
+        </div>
+      </div>
+      <div class="prep-footer">
+        <p>הצילום עצמו קצר וקל — פשוט תגיעו עם חיוך ואנחנו נדאג לכל השאר.</p>
+      </div>
     </div>
   `;
 
