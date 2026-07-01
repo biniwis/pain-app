@@ -113,7 +113,7 @@ adminRouter.post('/:id/slots', (req, res) => {
 adminRouter.get('/:id/bookings', (req, res) => {
   const bookings = db
     .prepare(
-      `SELECT b.id, b.client_name, b.client_email, b.client_phone, b.department, b.notes,
+      `SELECT b.id, b.client_name, b.client_email, b.client_phone, b.department, b.notes, b.attended,
               s.date, s.start_time, s.end_time
        FROM bookings b
        JOIN slots s ON s.id = b.slot_id
@@ -145,6 +145,24 @@ publicRouter.get('/:slug/slots', (req, res) => {
     )
     .all(event.id);
   res.json(slots);
+});
+
+// Public registrants list: intentionally omits contact info and attendance status.
+publicRouter.get('/:slug/bookings', (req, res) => {
+  const event = db.prepare('SELECT id FROM events WHERE slug = ?').get(req.params.slug);
+  if (!event) {
+    return res.status(404).json({ error: 'Event not found' });
+  }
+  const bookings = db
+    .prepare(
+      `SELECT s.date, s.start_time, b.client_name, b.department
+       FROM bookings b
+       JOIN slots s ON s.id = b.slot_id
+       WHERE s.event_id = ?
+       ORDER BY s.date, s.start_time`
+    )
+    .all(event.id);
+  res.json(bookings);
 });
 
 module.exports = { publicRouter, adminRouter };

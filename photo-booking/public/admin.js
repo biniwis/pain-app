@@ -184,6 +184,12 @@ function renderEventDetail() {
         <td>${b.client_name}</td>
         <td>${b.client_email || ''}${b.client_email && b.client_phone ? ' / ' : ''}${b.client_phone || ''}</td>
         <td>${b.department || ''}</td>
+        <td>
+          <label style="display:inline-flex; align-items:center; gap:4px; margin:0;">
+            <input type="checkbox" data-attended-id="${b.id}" ${b.attended ? 'checked' : ''} style="width:auto;" />
+            <span style="display:inline;">הגיע/ה</span>
+          </label>
+        </td>
       </tr>
     `
     )
@@ -222,8 +228,8 @@ function renderEventDetail() {
     <div class="card">
       <h2>הזמנות</h2>
       <table>
-        <thead><tr><th>תאריך</th><th>שעה</th><th>שם</th><th>פרטי קשר</th><th>מחלקה</th></tr></thead>
-        <tbody>${bookingRows || '<tr><td colspan="5" class="muted">אין הזמנות עדיין</td></tr>'}</tbody>
+        <thead><tr><th>תאריך</th><th>שעה</th><th>שם</th><th>פרטי קשר</th><th>מחלקה</th><th>הגעה</th></tr></thead>
+        <tbody>${bookingRows || '<tr><td colspan="6" class="muted">אין הזמנות עדיין</td></tr>'}</tbody>
       </table>
     </div>
   `;
@@ -249,6 +255,19 @@ function renderEventDetail() {
         await loadEventDetail(ev.id);
         render();
       }
+    });
+  });
+
+  document.querySelectorAll('[data-attended-id]').forEach((checkbox) => {
+    checkbox.addEventListener('change', async () => {
+      const id = checkbox.dataset.attendedId;
+      const booking = state.bookings.find((b) => String(b.id) === id);
+      booking.attended = checkbox.checked ? 1 : 0;
+      await fetch(`/api/admin/bookings/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        body: JSON.stringify({ attended: checkbox.checked }),
+      });
     });
   });
 

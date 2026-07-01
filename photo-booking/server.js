@@ -5,7 +5,7 @@ const path = require('path');
 const { router: adminAuthRouter, requireAdmin } = require('./routes/admin');
 const { publicRouter: eventsPublicRouter, adminRouter: eventsAdminRouter } = require('./routes/events');
 const { adminRouter: slotsAdminRouter } = require('./routes/slots');
-const { publicRouter: bookingsPublicRouter } = require('./routes/bookings');
+const { publicRouter: bookingsPublicRouter, adminRouter: bookingsAdminRouter } = require('./routes/bookings');
 
 if (!process.env.ADMIN_PASSWORD) {
   console.warn('Warning: ADMIN_PASSWORD is not set. Copy .env.example to .env and set a password.');
@@ -20,6 +20,7 @@ app.use('/api/bookings', bookingsPublicRouter);
 app.use('/api/admin', adminAuthRouter);
 app.use('/api/admin/events', requireAdmin, eventsAdminRouter);
 app.use('/api/admin/slots', requireAdmin, slotsAdminRouter);
+app.use('/api/admin/bookings', requireAdmin, bookingsAdminRouter);
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {

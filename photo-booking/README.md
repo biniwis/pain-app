@@ -27,8 +27,8 @@ Use `npm run dev` instead of `npm start` to auto-restart on file changes while d
 1. Open `/admin.html`, enter the admin password (from `.env`).
 2. Create an event (e.g. the client company's name). This generates a shareable booking link for that event.
 3. Open the event's management view and generate slots: pick a date, a start time, an end time, and how long each session should take (in minutes) — the system splits that range into back-to-back slots automatically. Repeat for other days as needed.
-4. Copy the event's link and send it to clients. They'll see open slots grouped by date, pick one, fill in their name and contact info, and confirm — after booking, they can add the appointment to their calendar (download an .ics file, or add directly to Google Calendar) so they get a reminder.
-5. Booked slots disappear from the public page automatically. Check the event's bookings table in the admin page to see who booked what.
+4. Copy the event's link and send it to clients. They'll see open slots grouped by date, pick one, fill in their name and contact info, and confirm — after booking, they can add the appointment to their calendar (download an .ics file, or add directly to Google Calendar) so they get a reminder. There's also a "מי כבר נרשם" (who already signed up) tab so clients can see who else booked and when — it only shows name/date/time/department, never contact info.
+5. Booked slots disappear from the public page automatically. Check the event's bookings table in the admin page to see who booked what, and tick the "הגיע/ה" (attended) checkbox once someone has actually shown up for their session.
 
 ## Sharing a public link quickly (no deployment)
 

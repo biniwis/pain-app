@@ -12,6 +12,8 @@ const state = {
   submitting: false,
   confirmed: null,
   invalidLink: false,
+  view: 'book', // 'book' | 'registrants'
+  registrants: null,
 };
 
 function formatDate(dateStr) {
@@ -53,6 +55,18 @@ function render() {
   pageTitle.textContent = `קביעת תור - ${state.event.name}`;
   pageSubtitle.textContent = 'בחרו תאריך ושעה פנויים, מלאו כמה פרטים ואנחנו נסמן לכם את התור.';
 
+  const tabsHtml = `
+    <div class="actions-row" style="justify-content:center; margin-bottom:16px;">
+      <button type="button" class="${state.view === 'book' ? 'primary' : 'secondary'}" id="tab-book">קביעת תור</button>
+      <button type="button" class="${state.view === 'registrants' ? 'primary' : 'secondary'}" id="tab-registrants">מי כבר נרשם</button>
+    </div>
+  `;
+
+  if (state.view === 'registrants' && !state.confirmed) {
+    renderRegistrantsList(tabsHtml);
+    return;
+  }
+
   if (state.confirmed) {
     renderConfirmation();
     return;
@@ -61,11 +75,12 @@ function render() {
   const groups = groupByDate(state.slots);
 
   if (state.slots.length === 0) {
-    app.innerHTML = '<div class="card"><p class="muted">אין כרגע תורים פנויים. נסו לבדוק שוב מאוחר יותר.</p></div>';
+    app.innerHTML = tabsHtml + '<div class="card"><p class="muted">אין כרגע תורים פנויים. נסו לבדוק שוב מאוחר יותר.</p></div>';
+    attachTabListeners();
     return;
   }
 
-  let html = '';
+  let html = tabsHtml;
   for (const [date, slots] of groups) {
     html += `<div class="date-group card"><h2>${formatDate(date)}</h2><div class="slot-buttons">`;
     for (const slot of slots) {
@@ -98,6 +113,7 @@ function render() {
   }
 
   app.innerHTML = html;
+  attachTabListeners();
 
   app.querySelectorAll('button.slot').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -121,6 +137,52 @@ function render() {
   if (form) {
     form.addEventListener('submit', handleSubmit);
   }
+}
+
+function attachTabListeners() {
+  const bookTab = document.getElementById('tab-book');
+  const registrantsTab = document.getElementById('tab-registrants');
+  if (bookTab) {
+    bookTab.addEventListener('click', () => {
+      state.view = 'book';
+      render();
+    });
+  }
+  if (registrantsTab) {
+    registrantsTab.addEventListener('click', async () => {
+      state.view = 'registrants';
+      const res = await fetch(`/api/events/${eventSlug}/bookings`);
+      state.registrants = await res.json();
+      render();
+    });
+  }
+}
+
+function renderRegistrantsList(tabsHtml) {
+  const rows = (state.registrants || [])
+    .map(
+      (b) => `
+      <tr>
+        <td>${formatDate(b.date)}</td>
+        <td>${b.start_time}</td>
+        <td>${b.client_name}</td>
+        <td>${b.department || ''}</td>
+      </tr>
+    `
+    )
+    .join('');
+
+  app.innerHTML = `
+    ${tabsHtml}
+    <div class="card">
+      <h2>מי כבר נרשם</h2>
+      <table>
+        <thead><tr><th>תאריך</th><th>שעה</th><th>שם</th><th>מחלקה</th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="4" class="muted">אין נרשמים עדיין</td></tr>'}</tbody>
+      </table>
+    </div>
+  `;
+  attachTabListeners();
 }
 
 function pad(n) {

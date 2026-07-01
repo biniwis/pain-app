@@ -2,6 +2,7 @@ const express = require('express');
 const db = require('../db');
 
 const publicRouter = express.Router();
+const adminRouter = express.Router();
 
 publicRouter.post('/', (req, res) => {
   const { slot_id, client_name, client_email, client_phone, department, notes } = req.body || {};
@@ -59,4 +60,14 @@ publicRouter.post('/', (req, res) => {
   }
 });
 
-module.exports = { publicRouter };
+adminRouter.patch('/:id', (req, res) => {
+  const booking = db.prepare('SELECT * FROM bookings WHERE id = ?').get(req.params.id);
+  if (!booking) {
+    return res.status(404).json({ error: 'Booking not found' });
+  }
+  const { attended } = req.body || {};
+  db.prepare('UPDATE bookings SET attended = ? WHERE id = ?').run(attended ? 1 : 0, req.params.id);
+  res.json({ ok: true });
+});
+
+module.exports = { publicRouter, adminRouter };
