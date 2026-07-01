@@ -206,7 +206,7 @@ publicRouter.get('/:slug/bookings', (req, res) => {
   }
   const bookings = db
     .prepare(
-      `SELECT s.date, s.start_time, b.client_name, b.department
+      `SELECT b.id, s.date, s.start_time, b.client_name, b.department
        FROM bookings b
        JOIN slots s ON s.id = b.slot_id
        WHERE s.event_id = ?
